@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../lib/AuthContext'
 
@@ -116,7 +116,7 @@ export default function Nav() {
       <div className="gv-nav-brand" onClick={() => navigate('/')}>
         <div className="gv-brand-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
           </svg>
         </div>
         <span className="gv-brand-name">GAMEVERSE</span>
