@@ -1,10 +1,11 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
+import Card3D from './Card3D.jsx'
 
 // Skeleton shimmer card — same outer dimensions as GameCard
 export function GameCardSkeleton() {
   return (
-    <div className="game-card game-card--skeleton" aria-hidden="true">
+    <div className="game-card game-card--skeleton glass" aria-hidden="true">
       <div className="skeleton-thumb" />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div className="skeleton-line" style={{ width: '65%' }} />
@@ -26,7 +27,7 @@ export default function GameCard({
   title, thumb, salePrice, normalPrice, savings, store, url, actions,
   gameId,        // CheapShark gameID — enables click-to-detail navigation
   storeCount,    // number of stores carrying this game
-  glass = false,
+  glass = true,
 }) {
   const navigate = useNavigate()
   const shouldReduce = useReducedMotion()
@@ -38,64 +39,73 @@ export default function GameCard({
   }
 
   return (
-    <motion.div
-      className={`game-card${glass ? ' glass' : ''}`}
+    <Card3D
+      maxTilt={shouldReduce ? 0 : 10}
+      scale={1.02}
       onClick={handleCardClick}
-      style={{
-        borderColor: glass ? 'var(--glass-border)' : 'var(--line)',
-        cursor: gameId ? 'pointer' : 'default',
-      }}
-      whileHover={shouldReduce ? {} : {
-        borderColor: glass ? 'var(--grad-start)' : 'var(--gold)',
-        transition: { duration: 0.15 },
-      }}
+      disabled={shouldReduce}
+      style={{ cursor: gameId ? 'pointer' : 'default' }}
     >
-      {/* Cover art */}
-      <img src={thumb} alt="" />
+      <div className={`game-card${glass ? ' glass' : ''}`}>
+        {/* Cover art with 3D layer */}
+        <div className="game-card__media">
+          <img src={thumb} alt={title || ''} className="game-card__img" />
+          {savings > 0.5 && (
+            <span className="game-card__badge-3d">
+              -{Math.round(savings)}%
+            </span>
+          )}
+        </div>
 
-      {/* Title + store + prices */}
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 600, fontSize: 14 }}>{title}</div>
-        {store && (
-          <div className="eyebrow" style={{ marginTop: 2 }}>
-            {store}
-            {storeCount > 1 && (
-              <span style={{ marginLeft: 6, color: 'var(--teal)', fontWeight: 600 }}>
-                +{storeCount - 1} store{storeCount - 1 !== 1 ? 's' : ''}
-              </span>
+        {/* Title + store + prices */}
+        <div className="game-card__info">
+          <div className="game-card__title" title={title}>{title}</div>
+          {store && (
+            <div className="game-card__store">
+              {store}
+              {storeCount > 1 && (
+                <span className="game-card__store-count">
+                  +{storeCount - 1} store{storeCount - 1 !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+          )}
+          <div className="game-card__prices">
+            <span className="game-card__price">${Number(salePrice).toFixed(2)}</span>
+            {normalPrice > salePrice && (
+              <span className="game-card__original">${Number(normalPrice).toFixed(2)}</span>
             )}
           </div>
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-          <span className="game-card__price">${Number(salePrice).toFixed(2)}</span>
-          {normalPrice > salePrice && (
-            <span className="game-card__original">${Number(normalPrice).toFixed(2)}</span>
+          {gameId && (
+            <div className="game-card__hint">
+              Click to compare stores →
+            </div>
           )}
-          {savings > 0.5 && <span className="game-card__discount">-{Math.round(savings)}%</span>}
         </div>
-        {gameId && (
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, letterSpacing: '0.03em' }}>
-            Click to compare all stores →
-          </div>
-        )}
-      </div>
 
-      {/* Actions */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' }}>
-        {url && (
-          <a className="btn btn--ghost" href={url} target="_blank" rel="noreferrer">
-            View
-          </a>
-        )}
-        {actions && (
-          <motion.div
-            whileTap={shouldReduce ? {} : { scale: 0.92 }}
-            transition={{ duration: 0.1 }}
-          >
-            {actions}
-          </motion.div>
-        )}
+        {/* Actions */}
+        <div className="game-card__actions">
+          {url && (
+            <a
+              className="catalog-btn catalog-btn--primary"
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              style={{ padding: '6px 12px', fontSize: 12 }}
+            >
+              View
+            </a>
+          )}
+          {actions && (
+            <motion.div
+              whileTap={shouldReduce ? {} : { scale: 0.94 }}
+              transition={{ duration: 0.1 }}
+            >
+              {actions}
+            </motion.div>
+          )}
+        </div>
       </div>
-    </motion.div>
+    </Card3D>
   )
 }

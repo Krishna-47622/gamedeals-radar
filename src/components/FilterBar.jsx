@@ -3,12 +3,12 @@ import { useSearchParams } from 'react-router-dom'
 import { getStores } from '../lib/dealsApi'
 
 const SORT_OPTIONS = [
-  { value: 'Deal Rating',  label: 'Deal Rating' },
-  { value: 'Price',        label: 'Price: Low → High' },
-  { value: '-Price',       label: 'Price: High → Low' },
-  { value: 'Savings',      label: 'Discount %' },
-  { value: 'Release',      label: 'Release Date' },
-  { value: 'Title',        label: 'Alphabetical' },
+  { value: 'Deal Rating',  label: '🔥 Deal Rating' },
+  { value: 'Price',        label: '💲 Price: Low → High' },
+  { value: '-Price',       label: '💎 Price: High → Low' },
+  { value: 'Savings',      label: '⚡ Discount %' },
+  { value: 'Release',      label: '📅 Release Date' },
+  { value: 'Title',        label: '🔤 Alphabetical' },
 ]
 
 const DISCOUNT_THRESHOLDS = [
@@ -20,7 +20,15 @@ const DISCOUNT_THRESHOLDS = [
 
 const STORE_WHITELIST = ['Steam', 'Epic Games Store', 'GOG', 'Humble Store', 'Fanatical']
 
-export default function FilterBar({ onChange }) {
+const STORE_ICONS = {
+  Steam: '🎮',
+  'Epic Games Store': '⚡',
+  GOG: '🌌',
+  'Humble Store': '🎁',
+  Fanatical: '🔥',
+}
+
+export default function FilterBar() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [stores, setStores] = useState([])
   const [priceRange, setPriceRange] = useState([
@@ -47,7 +55,7 @@ export default function FilterBar({ onChange }) {
       Number(searchParams.get('lowerPrice') || 0),
       Number(searchParams.get('upperPrice') || 70),
     ])
-  }, []) // eslint-disable-line
+  }, [searchParams])
 
   // Read current filter state from URL
   const sortBy     = searchParams.get('sortBy')     || 'Deal Rating'
@@ -97,48 +105,90 @@ export default function FilterBar({ onChange }) {
   const hasFilters = sortBy !== 'Deal Rating' || storeID || onSale || freeOnly ||
     minSavings > 0 || priceRange[0] > 0 || priceRange[1] < 70
 
+  // Dynamic style for range fill
+  const minPercent = (priceRange[0] / 70) * 100
+  const maxPercent = (priceRange[1] / 70) * 100
+
   return (
-    <div className="filter-bar">
+    <div className="filter-bar glass">
       {/* Sort */}
       <div className="filter-group">
-        <label className="filter-label">Sort by</label>
-        <select
-          className="filter-select"
-          value={sortBy}
-          onChange={e => setParam('sortBy', e.target.value)}
-        >
-          {SORT_OPTIONS.map(o => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <label className="filter-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="14" y2="12"></line>
+            <line x1="4" y1="18" x2="8" y2="18"></line>
+          </svg>
+          Sort by
+        </label>
+        <div className="filter-select-wrapper">
+          <select
+            className="filter-select"
+            value={sortBy}
+            onChange={e => setParam('sortBy', e.target.value)}
+          >
+            {SORT_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <span className="filter-select-arrow">▼</span>
+        </div>
       </div>
 
       {/* Store */}
       <div className="filter-group">
-        <label className="filter-label">Store</label>
+        <label className="filter-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          Store
+        </label>
         <div className="filter-chips">
-          {stores.map(st => (
-            <button
-              key={st.storeID}
-              className={`filter-chip ${storeID === String(st.storeID) ? 'active' : ''}`}
-              onClick={() => toggleStore(st.storeID)}
-            >
-              {st.storeName}
-            </button>
-          ))}
+          {stores.map(st => {
+            const isActive = storeID === String(st.storeID)
+            const icon = STORE_ICONS[st.storeName] || '🎮'
+            return (
+              <button
+                key={st.storeID}
+                className={`filter-chip ${isActive ? 'active' : ''}`}
+                onClick={() => toggleStore(st.storeID)}
+              >
+                <span className="filter-chip__icon">{icon}</span>
+                <span>{st.storeName}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
       {/* Price range */}
-      <div className="filter-group">
-        <label className="filter-label">
-          Price: ${priceRange[0]} – ${priceRange[1] >= 70 ? '70+' : priceRange[1]}
-        </label>
+      <div className="filter-group filter-group--range">
+        <div className="filter-label-row">
+          <label className="filter-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            Price Range
+          </label>
+          <span className="filter-price-pill">
+            ${priceRange[0]} – ${priceRange[1] >= 70 ? '70+' : priceRange[1]}
+          </span>
+        </div>
         <div className="filter-range-track">
+          <div
+            className="filter-range-fill"
+            style={{
+              left: `${minPercent}%`,
+              width: `${maxPercent - minPercent}%`,
+            }}
+          />
           <input
             type="range" min={0} max={70} step={1}
             value={priceRange[0]}
-            className="filter-range"
+            className="filter-range filter-range--lower"
             onChange={e => {
               const v = Math.min(Number(e.target.value), priceRange[1] - 1)
               handlePriceChange(v, priceRange[1])
@@ -147,7 +197,7 @@ export default function FilterBar({ onChange }) {
           <input
             type="range" min={0} max={70} step={1}
             value={priceRange[1]}
-            className="filter-range"
+            className="filter-range filter-range--upper"
             onChange={e => {
               const v = Math.max(Number(e.target.value), priceRange[0] + 1)
               handlePriceChange(priceRange[0], v)
@@ -158,12 +208,19 @@ export default function FilterBar({ onChange }) {
 
       {/* Discount thresholds */}
       <div className="filter-group">
-        <label className="filter-label">Discount</label>
+        <label className="filter-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="19" y1="5" x2="5" y2="19"></line>
+            <circle cx="6.5" cy="6.5" r="2.5"></circle>
+            <circle cx="17.5" cy="17.5" r="2.5"></circle>
+          </svg>
+          Min Discount
+        </label>
         <div className="filter-chips">
           {DISCOUNT_THRESHOLDS.map(({ label, value }) => (
             <button
               key={value}
-              className={`filter-chip ${minSavings === value ? 'active' : ''}`}
+              className={`filter-chip filter-chip--discount ${minSavings === value ? 'active' : ''}`}
               onClick={() => toggleDiscount(value)}
             >
               {label}
@@ -174,27 +231,37 @@ export default function FilterBar({ onChange }) {
 
       {/* Toggles */}
       <div className="filter-group filter-toggles">
-        <label className="filter-toggle">
-          <input
-            type="checkbox"
-            checked={onSale}
-            onChange={e => setParam('onSale', e.target.checked ? '1' : '')}
-          />
-          On Sale
+        <label className="filter-switch-label">
+          <span className="filter-switch">
+            <input
+              type="checkbox"
+              checked={onSale}
+              onChange={e => setParam('onSale', e.target.checked ? '1' : '')}
+            />
+            <span className="filter-switch-slider" />
+          </span>
+          <span className="filter-switch-text">On Sale</span>
         </label>
-        <label className="filter-toggle">
-          <input
-            type="checkbox"
-            checked={freeOnly}
-            onChange={e => setParam('freeOnly', e.target.checked ? '1' : '')}
-          />
-          Free Only
+        <label className="filter-switch-label">
+          <span className="filter-switch">
+            <input
+              type="checkbox"
+              checked={freeOnly}
+              onChange={e => setParam('freeOnly', e.target.checked ? '1' : '')}
+            />
+            <span className="filter-switch-slider" />
+          </span>
+          <span className="filter-switch-text">Free Only 🎉</span>
         </label>
       </div>
 
       {/* Clear */}
       {hasFilters && (
-        <button className="filter-clear" onClick={clearAll}>
+        <button className="filter-clear" onClick={clearAll} title="Reset all filters">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
           Clear filters
         </button>
       )}

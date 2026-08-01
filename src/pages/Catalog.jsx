@@ -2,16 +2,18 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getCatalog, getRawgCover, compareGamePrices } from '../lib/dealsApi'
 import FilterBar from '../components/FilterBar.jsx'
+import Card3D from '../components/Card3D.jsx'
 import { addToWishlist } from '../lib/wishlist'
 
 // ---------------------------------------------------------------------------
-// CatalogCard — rich card with cover, prices, expandable store compare row
+// CatalogCard — 3D perspective card with cover, prices, & expandable store compare row
 // ---------------------------------------------------------------------------
 function CatalogCard({ deal }) {
   const [cover, setCover] = useState(deal.thumb)
   const [expanded, setExpanded] = useState(false)
   const [stores, setStores] = useState(null)
   const [loadingStores, setLoadingStores] = useState(false)
+  const [wishlistAdded, setWishlistAdded] = useState(false)
 
   // Try RAWG for better cover art
   useEffect(() => {
@@ -22,7 +24,8 @@ function CatalogCard({ deal }) {
     return () => { cancelled = true }
   }, [deal.title])
 
-  async function toggleCompare() {
+  async function toggleCompare(e) {
+    e.stopPropagation()
     if (expanded) { setExpanded(false); return }
     setExpanded(true)
     if (stores !== null) return
@@ -32,90 +35,127 @@ function CatalogCard({ deal }) {
     setLoadingStores(false)
   }
 
+  async function handleAddToWishlist(e) {
+    e.stopPropagation()
+    setWishlistAdded(true)
+    await addToWishlist({ external_id: deal.gameID, title: deal.title, cover_url: cover || deal.thumb })
+    setTimeout(() => setWishlistAdded(false), 2000)
+  }
+
   const discountPct = Math.round(deal.savings)
 
   return (
-    <div className="catalog-card glass">
-      {/* Cover */}
-      <div className="catalog-card__cover">
-        <img
-          src={cover || deal.thumb}
-          alt={deal.title}
-          onError={() => setCover(`https://placehold.co/300x170/1B1E27/E8B84B?text=${encodeURIComponent(deal.title?.slice(0, 12) || 'Game')}`)}
-        />
-        {discountPct > 0 && (
-          <span className="catalog-card__badge">-{discountPct}%</span>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="catalog-card__body">
-        <div className="catalog-card__title" title={deal.title}>{deal.title}</div>
-        <div className="catalog-card__store eyebrow">{deal.store}</div>
-
-        <div className="catalog-card__prices">
-          <span className="game-card__price">${deal.salePrice.toFixed(2)}</span>
-          {deal.normalPrice > deal.salePrice && (
-            <span className="game-card__original">${deal.normalPrice.toFixed(2)}</span>
+    <Card3D className="catalog-card-wrap" maxTilt={12} scale={1.02}>
+      <div className="catalog-card glass">
+        {/* Cover image with 3D depth layer */}
+        <div className="catalog-card__cover">
+          <img
+            src={cover || deal.thumb}
+            alt={deal.title}
+            onError={() => setCover(`https://placehold.co/300x170/1B1E27/FF2B55?text=${encodeURIComponent(deal.title?.slice(0, 12) || 'Game')}`)}
+          />
+          <div className="catalog-card__cover-overlay" />
+          
+          {discountPct > 0 && (
+            <span className="catalog-card__badge-3d">
+              ⚡ -{discountPct}%
+            </span>
           )}
+          
+          <span className="catalog-card__store-tag">
+            {deal.store || 'Featured'}
+          </span>
         </div>
 
-        <div className="catalog-card__actions">
-          <a
-            className="btn btn--ghost"
-            href={deal.url}
-            target="_blank"
-            rel="noreferrer"
-            style={{ fontSize: 12, padding: '6px 10px' }}
-          >
-            View deal ↗
-          </a>
-          <button
-            className="btn"
-            style={{ fontSize: 12, padding: '6px 10px' }}
-            onClick={() => addToWishlist({ external_id: deal.gameID, title: deal.title, cover_url: cover || deal.thumb })}
-          >
-            + Wishlist
-          </button>
-          <button
-            className={`btn btn--ghost catalog-card__compare-btn ${expanded ? 'active' : ''}`}
-            style={{ fontSize: 12, padding: '6px 10px' }}
-            onClick={toggleCompare}
-          >
-            Compare stores {expanded ? '▲' : '▼'}
-          </button>
-        </div>
+        {/* Info Body */}
+        <div className="catalog-card__body">
+          <h3 className="catalog-card__title" title={deal.title}>
+            {deal.title}
+          </h3>
 
-        {/* Cross-store compare row */}
-        {expanded && (
-          <div className="catalog-card__compare">
-            {loadingStores && (
-              <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>Loading stores…</div>
-            )}
-            {stores?.map(s => (
-              <a
-                key={s.dealID}
-                href={s.url}
-                target="_blank"
-                rel="noreferrer"
-                className="catalog-card__compare-row"
-              >
-                <span className="catalog-card__compare-store">{s.store}</span>
-                <span className="catalog-card__compare-price">${s.salePrice.toFixed(2)}</span>
-                {s.savings > 0.5 && (
-                  <span className="game-card__discount">-{Math.round(s.savings)}%</span>
-                )}
-              </a>
-            ))}
-            {stores?.length === 0 && (
-              <div style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-                No other store listings found.
-              </div>
+          <div className="catalog-card__prices-row">
+            <div className="catalog-card__price-group">
+              <span className="catalog-card__sale-price">${deal.salePrice.toFixed(2)}</span>
+              {deal.normalPrice > deal.salePrice && (
+                <span className="catalog-card__orig-price">${deal.normalPrice.toFixed(2)}</span>
+              )}
+            </div>
+            {discountPct > 0 && (
+              <span className="catalog-card__savings-label">
+                Save ${(deal.normalPrice - deal.salePrice).toFixed(2)}
+              </span>
             )}
           </div>
-        )}
+
+          <div className="catalog-card__actions">
+            <a
+              className="catalog-btn catalog-btn--primary"
+              href={deal.url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={e => e.stopPropagation()}
+            >
+              Get deal ↗
+            </a>
+            <button
+              className={`catalog-btn catalog-btn--secondary ${wishlistAdded ? 'added' : ''}`}
+              onClick={handleAddToWishlist}
+              title="Add to wishlist"
+            >
+              {wishlistAdded ? '✓ Added' : '+ Wishlist'}
+            </button>
+            <button
+              className={`catalog-btn catalog-btn--compare ${expanded ? 'active' : ''}`}
+              onClick={toggleCompare}
+            >
+              Stores {expanded ? '▲' : '▼'}
+            </button>
+          </div>
+
+          {/* Cross-store price comparison drawer */}
+          {expanded && (
+            <div className="catalog-card__compare-drawer" onClick={e => e.stopPropagation()}>
+              <div className="catalog-card__compare-header">
+                Store Comparison ({stores ? stores.length : '...'})
+              </div>
+
+              {loadingStores && (
+                <div className="catalog-card__compare-loading">
+                  <div className="loading-spinner" />
+                  <span>Comparing live prices...</span>
+                </div>
+              )}
+
+              {stores?.map(s => (
+                <a
+                  key={s.dealID}
+                  href={s.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="catalog-card__compare-row"
+                >
+                  <span className="catalog-card__compare-store">
+                    <span className="store-bullet">●</span> {s.store}
+                  </span>
+                  <div className="catalog-card__compare-price-wrap">
+                    <span className="catalog-card__compare-price">${s.salePrice.toFixed(2)}</span>
+                    {s.savings > 0.5 && (
+                      <span className="catalog-card__compare-badge">-{Math.round(s.savings)}%</span>
+                    )}
+                  </div>
+                </a>
+              ))}
+
+              {stores?.length === 0 && (
+                <div className="catalog-card__compare-empty">
+                  No other store listings found.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Card3D>
   )
 }
 
@@ -136,9 +176,7 @@ export default function Catalog() {
   const fetchDeals = useCallback(async (pageNum, reset = false) => {
     setLoading(true)
     try {
-      // Map URL params → getCatalog options
       const rawSort = searchParams.get('sortBy') || 'Deal Rating'
-      // CheapShark doesn't support descending via prefix; handle Price desc specially
       const sortBy = rawSort === '-Price' ? 'Price' : rawSort
       const reversePrice = rawSort === '-Price'
 
@@ -184,19 +222,21 @@ export default function Catalog() {
   }
 
   return (
-    <div>
-      <div className="eyebrow">Powered by CheapShark + RAWG</div>
-      <h1>Game Catalog</h1>
-      <p style={{ color: 'var(--text-muted)', marginTop: 0 }}>
-        Browse deals across every major store. Filter, sort, and compare prices.
-      </p>
+    <div className="catalog-page">
+      <div className="catalog-header">
+        <div className="catalog-header__badge">LIVE RADAR • CHEAPSHARK & RAWG</div>
+        <h1 className="catalog-header__title">Game Catalog</h1>
+        <p className="catalog-header__subtitle">
+          Browse real-time deals across Steam, Epic, GOG & major stores in interactive 3D perspective.
+        </p>
+      </div>
 
       <FilterBar />
 
       {loading && deals.length === 0 && (
-        <div className="catalog-loading">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="catalog-card catalog-card--skeleton" />
+        <div className="catalog-grid">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="catalog-card catalog-card--skeleton glass" />
           ))}
         </div>
       )}
@@ -208,23 +248,26 @@ export default function Catalog() {
       </div>
 
       {!loading && deals.length === 0 && (
-        <p style={{ color: 'var(--text-muted)', marginTop: 32, textAlign: 'center' }}>
-          No deals match your filters. Try adjusting the search.
-        </p>
+        <div className="catalog-empty glass">
+          <div className="catalog-empty__icon">🔍</div>
+          <h3>No deals match your selected filters</h3>
+          <p>Try clearing or broadening your store, price, or discount selection.</p>
+        </div>
       )}
 
       {hasMore && !loading && deals.length > 0 && (
-        <div style={{ textAlign: 'center', marginTop: 32 }}>
-          <button className="btn btn--ghost" onClick={loadMore} style={{ padding: '10px 32px' }}>
-            Load more
+        <div className="catalog-load-more">
+          <button className="catalog-btn catalog-btn--load" onClick={loadMore}>
+            Load more deals
           </button>
         </div>
       )}
 
       {loading && deals.length > 0 && (
-        <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: 20 }}>
-          Loading…
-        </p>
+        <div className="catalog-loading-more">
+          <div className="loading-spinner" />
+          <span>Fetching next deals...</span>
+        </div>
       )}
     </div>
   )
