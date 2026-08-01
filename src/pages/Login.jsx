@@ -20,15 +20,17 @@ export default function Login() {
     setBusy(true)
     try {
       if (mode === 'signup') {
-        const { data, error: signErr } = await supabase.auth.signUp({ email, password })
+        // username is passed as auth metadata; a DB trigger (handle_new_user)
+        // creates the profiles row server-side with security definer, so this
+        // works even before email confirmation / before a session exists —
+        // avoids the "new row violates row-level security policy" error that
+        // happens if the client tries to insert into profiles directly here.
+        const { error: signErr } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { username } },
+        })
         if (signErr) throw signErr
-        if (data.user) {
-          const { error: profErr } = await supabase.from('profiles').insert({
-            id: data.user.id,
-            username,
-          })
-          if (profErr) throw profErr
-        }
       } else {
         const { error: signErr } = await supabase.auth.signInWithPassword({ email, password })
         if (signErr) throw signErr

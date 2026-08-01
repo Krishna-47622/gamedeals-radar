@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { compareGamePrices } from '../lib/dealsApi'
 import { addToWishlist } from '../lib/wishlist'
-import GameCard from '../components/GameCard.jsx'
+import GameCard, { GameCardSkeleton } from '../components/GameCard.jsx'
+import { AnimatedGrid, AnimatedCard } from '../components/motion.jsx'
 
 export default function ComparePrices() {
   const [query, setQuery] = useState('')
@@ -43,28 +44,39 @@ export default function ComparePrices() {
         <p style={{ color: 'var(--text-muted)', marginTop: 20 }}>No listings found for "{query}".</p>
       )}
 
-      <div style={{ display: 'grid', gap: 10, marginTop: 20 }}>
-        {results.map(r => (
-          <GameCard
-            key={r.dealID}
-            title={r.title}
-            thumb={r.thumb}
-            salePrice={r.salePrice}
-            normalPrice={r.normalPrice}
-            savings={r.savings}
-            store={r.store}
-            url={r.url}
-            actions={
-              <button
-                className="btn"
-                onClick={() => addToWishlist({ external_id: r.gameId, title: r.title, cover_url: r.thumb })}
-              >
-                + Wishlist
-              </button>
-            }
-          />
+      {/* Skeleton while searching */}
+      {loading && (
+        <div style={{ display: 'grid', gap: 10, marginTop: 20 }}>
+          {Array.from({ length: 6 }).map((_, i) => <GameCardSkeleton key={i} />)}
+        </div>
+      )}
+
+      {/* Staggered results grid */}
+      {!loading && results.length > 0 && (
+      <AnimatedGrid style={{ display: 'grid', gap: 10, marginTop: 20 }}>
+        {results.map((r, i) => (
+          <AnimatedCard key={r.dealID} index={i}>
+            <GameCard
+              title={r.title}
+              thumb={r.thumb}
+              salePrice={r.salePrice}
+              normalPrice={r.normalPrice}
+              savings={r.savings}
+              store={r.store}
+              url={r.url}
+              actions={
+                <button
+                  className="btn"
+                  onClick={() => addToWishlist({ external_id: r.gameId, title: r.title, cover_url: r.thumb })}
+                >
+                  + Wishlist
+                </button>
+              }
+            />
+          </AnimatedCard>
         ))}
-      </div>
+      </AnimatedGrid>
+      )}
     </div>
   )
 }

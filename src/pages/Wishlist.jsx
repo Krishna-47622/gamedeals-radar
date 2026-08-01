@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getWishlist, removeFromWishlist } from '../lib/wishlist'
 import { compareGamePrices, isFree } from '../lib/dealsApi'
-import GameCard from '../components/GameCard.jsx'
+import GameCard, { GameCardSkeleton } from '../components/GameCard.jsx'
+import { AnimatedGrid, AnimatedCard } from '../components/motion.jsx'
 
 export default function Wishlist() {
   const [items, setItems] = useState([])
@@ -32,34 +33,39 @@ export default function Wishlist() {
         We check these daily and notify you on price drops or when they go free.
       </p>
 
-      {loading && <p>Loading…</p>}
+      {loading && (
+        <div style={{ display: 'grid', gap: 10, marginTop: 20 }}>
+          {Array.from({ length: 5 }).map((_, i) => <GameCardSkeleton key={i} />)}
+        </div>
+      )}
       {!loading && items.length === 0 && (
         <p style={{ color: 'var(--text-muted)' }}>Nothing here yet — add games from Trending or Compare Prices.</p>
       )}
 
-      <div style={{ display: 'grid', gap: 10, marginTop: 20 }}>
-        {items.map(item => {
+      <AnimatedGrid style={{ display: 'grid', gap: 10, marginTop: 20 }}>
+        {items.map((item, i) => {
           const best = prices[item.game_id]
           const free = best && isFree(best)
           return (
-            <GameCard
-              key={item.game_id}
-              title={item.games.title}
-              thumb={item.games.cover_url}
-              salePrice={best?.salePrice ?? '—'}
-              normalPrice={best?.normalPrice ?? 0}
-              savings={best?.savings ?? 0}
-              store={free ? 'FREE RIGHT NOW 🎉' : best?.store}
-              url={best?.url}
-              actions={
-                <button className="btn btn--ghost" onClick={async () => { await removeFromWishlist(item.game_id); load() }}>
-                  Remove
-                </button>
-              }
-            />
+            <AnimatedCard key={item.game_id} index={i}>
+              <GameCard
+                title={item.games.title}
+                thumb={item.games.cover_url}
+                salePrice={best?.salePrice ?? '—'}
+                normalPrice={best?.normalPrice ?? 0}
+                savings={best?.savings ?? 0}
+                store={free ? 'FREE RIGHT NOW 🎉' : best?.store}
+                url={best?.url}
+                actions={
+                  <button className="btn btn--ghost" onClick={async () => { await removeFromWishlist(item.game_id); load() }}>
+                    Remove
+                  </button>
+                }
+              />
+            </AnimatedCard>
           )
         })}
-      </div>
+      </AnimatedGrid>
     </div>
   )
 }
