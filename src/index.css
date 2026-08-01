@@ -1,0 +1,184 @@
+:root {
+  --ink: #12141B;
+  --surface: #1B1E27;
+  --surface-raised: #232733;
+  --line: #2E3340;
+  --text: #EDEEF2;
+  --text-muted: #8A8F9C;
+  --gold: #E8B84B;
+  --gold-dim: #6B5A2E;
+  --teal: #35C9C1;
+  --drop-green: #4CD97D;
+  --stale-red: #E85D5D;
+
+  --display: 'Space Grotesk', sans-serif;
+  --body: 'Inter', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--body);
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--body); cursor: pointer; }
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* --- Deal ticker: the signature element --- */
+.deal-ticker {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  width: 100%;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  height: 34px;
+  display: flex;
+  align-items: center;
+}
+.deal-ticker__track {
+  display: flex;
+  gap: 40px;
+  white-space: nowrap;
+  animation: ticker-scroll 40s linear infinite;
+  padding-left: 100%;
+}
+.deal-ticker__item {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.deal-ticker__item strong { color: var(--gold); }
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deal-ticker__track { animation: none; }
+}
+
+/* --- Sidebar nav --- */
+.nav {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nav__brand {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  padding: 0 10px 20px;
+}
+.nav__brand span { color: var(--gold); }
+.nav__link {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.nav__link:hover { background: var(--surface-raised); color: var(--text); }
+.nav__link.active { background: var(--surface-raised); color: var(--gold); }
+
+.main {
+  flex: 1;
+  padding: 28px 36px;
+  max-width: 1100px;
+}
+
+h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0 0 6px; }
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* --- Price tag / ticket stub card --- */
+.game-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  position: relative;
+}
+.game-card img { width: 64px; height: 64px; border-radius: 6px; object-fit: cover; background: var(--surface-raised); }
+.game-card__price {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--gold);
+}
+.game-card__original {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+.game-card__discount {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: rgba(76, 217, 125, 0.15);
+  color: var(--drop-green);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+/* perforated ticket edge */
+.game-card::before {
+  content: '';
+  position: absolute;
+  left: -6px; top: 50%;
+  width: 12px; height: 12px;
+  background: var(--ink);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+input, textarea {
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-family: var(--body);
+  font-size: 14px;
+}
+input:focus, textarea:focus, button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.btn {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
