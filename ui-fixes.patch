@@ -1,0 +1,303 @@
+diff --git a/src/App.jsx b/src/App.jsx
+index bbefecc..ad522f9 100644
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -3,7 +3,6 @@ import { AnimatePresence } from 'framer-motion'
+ import { useAuth } from './lib/AuthContext.jsx'
+ import Nav from './components/Nav.jsx'
+ import Header from './components/Header.jsx'
+-import FriendsSidebar from './components/FriendsSidebar.jsx'
+ import { PageTransition } from './components/motion.jsx'
+ import Login from './pages/Login.jsx'
+ import Trending from './pages/Trending.jsx'
+@@ -74,8 +73,6 @@ export default function App() {
+           </AnimatePresence>
+         </div>
+       </div>
+-
+-      {user && <FriendsSidebar />}
+     </div>
+   )
+ }
+diff --git a/src/components/FriendsSidebar.jsx b/src/components/FriendsSidebar.jsx
+deleted file mode 100644
+index 2128a68..0000000
+--- a/src/components/FriendsSidebar.jsx
++++ /dev/null
+@@ -1,87 +0,0 @@
+-import { useState } from 'react'
+-
+-const initialFriends = [
+-  { id: 1, name: 'CrimsonTiger67', status: 'Join · Resident Evil 4', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80', online: true, action: 'Join' },
+-  { id: 2, name: 'a1c4tr0z_sniper', status: 'Playing · Fortnite', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80', online: true },
+-  { id: 3, name: 'IceDragon', status: 'Playing · ROBLOX', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80', online: true },
+-  { id: 4, name: 'Bliizkriieg96', status: 'Join · EA Sports FC 24', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&auto=format&fit=crop&q=80', online: true, action: 'Join' },
+-  { id: 5, name: 'phoenix_rising', status: 'Join · Rocket League', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80', online: true, action: 'Join' },
+-  { id: 6, name: 'neonNova', status: 'Playing · GTA V', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80', online: true },
+-]
+-
+-const recentGames = [
+-  { id: 1, title: 'Hitman World of Assas...', progress: 72, thumb: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=120&auto=format&fit=crop&q=80' },
+-  { id: 2, title: 'Forza Horizon 5', progress: 47, thumb: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=120&auto=format&fit=crop&q=80' },
+-  { id: 3, title: 'The Witcher 3 Wild Hunt', progress: 12, thumb: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=120&auto=format&fit=crop&q=80' },
+-  { id: 4, title: 'NBA 2K24', progress: 96, thumb: 'https://images.unsplash.com/photo-1519766304817-4f37bda74a29?w=120&auto=format&fit=crop&q=80' },
+-]
+-
+-export default function FriendsSidebar() {
+-  const [friends] = useState(initialFriends)
+-
+-  return (
+-    <aside className="gv-friends-sidebar">
+-      {/* Friends Online Section */}
+-      <div className="gv-sidebar-section">
+-        <div className="gv-sidebar-section-header">
+-          <h3 className="gv-section-title">Friends online</h3>
+-          <button className="gv-action-icon-btn" title="Add Friend">
+-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+-              <line x1="12" y1="5" x2="12" y2="19"></line>
+-              <line x1="5" y1="12" x2="19" y2="12"></line>
+-            </svg>
+-          </button>
+-        </div>
+-
+-        <div className="gv-friends-list">
+-          {friends.map((friend) => (
+-            <div key={friend.id} className="gv-friend-item">
+-              <div className="gv-friend-avatar-wrap">
+-                <img src={friend.avatar} alt={friend.name} className="gv-friend-avatar" />
+-                <span className="gv-status-dot online"></span>
+-              </div>
+-              <div className="gv-friend-info">
+-                <span className="gv-friend-name">{friend.name}</span>
+-                <span className="gv-friend-status">{friend.status}</span>
+-              </div>
+-            </div>
+-          ))}
+-        </div>
+-      </div>
+-
+-      {/* Recently Played Section */}
+-      <div className="gv-sidebar-section" style={{ marginTop: 28 }}>
+-        <div className="gv-sidebar-section-header">
+-          <h3 className="gv-section-title">Recently played</h3>
+-          <button className="gv-action-icon-btn" title="More options">
+-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+-              <circle cx="12" cy="12" r="1"></circle>
+-              <circle cx="12" cy="5" r="1"></circle>
+-              <circle cx="12" cy="19" r="1"></circle>
+-            </svg>
+-          </button>
+-        </div>
+-
+-        <div className="gv-recent-list">
+-          {recentGames.map((game) => (
+-            <div key={game.id} className="gv-recent-item">
+-              <img src={game.thumb} alt={game.title} className="gv-recent-thumb" />
+-              <div className="gv-recent-info">
+-                <div className="gv-recent-header">
+-                  <span className="gv-recent-title">{game.title}</span>
+-                  <span className="gv-recent-pct">{game.progress}%</span>
+-                </div>
+-                <div className="gv-progress-bar-bg">
+-                  <div
+-                    className="gv-progress-bar-fill"
+-                    style={{ width: `${game.progress}%` }}
+-                  />
+-                </div>
+-              </div>
+-            </div>
+-          ))}
+-        </div>
+-      </div>
+-    </aside>
+-  )
+-}
+diff --git a/src/components/Nav.jsx b/src/components/Nav.jsx
+index dd09774..e2054da 100644
+--- a/src/components/Nav.jsx
++++ b/src/components/Nav.jsx
+@@ -119,7 +119,7 @@ export default function Nav() {
+             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
+           </svg>
+         </div>
+-        <span className="gv-brand-name">GAMEVERSE</span>
++        <span className="gv-brand-name">GAMESRADAR</span>
+       </div>
+ 
+       {/* Main Nav Items */}
+diff --git a/src/index.css b/src/index.css
+index 32df835..f409693 100644
+--- a/src/index.css
++++ b/src/index.css
+@@ -1,5 +1,5 @@
+ :root {
+-  /* ── GAMEVERSE UI SYSTEM ── */
++  /* ── GAMESRADAR UI SYSTEM ── */
+   --gv-bg-dark: #0D0E13;
+   --gv-sidebar-bg: #121318;
+   --gv-card-bg: #181920;
+@@ -299,164 +299,6 @@ button { font-family: var(--gv-font); cursor: pointer; }
+   color: var(--gv-text-muted);
+ }
+ 
+-/* Right Friends Sidebar */
+-.gv-friends-sidebar {
+-  width: 290px;
+-  flex-shrink: 0;
+-  background: var(--gv-sidebar-bg);
+-  border-left: 1px solid var(--gv-border);
+-  padding: 24px 20px;
+-  height: 100vh;
+-  position: sticky;
+-  top: 0;
+-  overflow-y: auto;
+-}
+-
+-.gv-sidebar-section-header {
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-  margin-bottom: 16px;
+-}
+-
+-.gv-section-title {
+-  font-size: 14px;
+-  font-weight: 700;
+-  color: #FFF;
+-  margin: 0;
+-}
+-
+-.gv-action-icon-btn {
+-  background: transparent;
+-  border: none;
+-  color: var(--gv-text-muted);
+-  cursor: pointer;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-}
+-
+-.gv-action-icon-btn:hover { color: white; }
+-
+-.gv-friends-list {
+-  display: flex;
+-  flex-direction: column;
+-  gap: 14px;
+-}
+-
+-.gv-friend-item {
+-  display: flex;
+-  align-items: center;
+-  gap: 12px;
+-}
+-
+-.gv-friend-avatar-wrap {
+-  position: relative;
+-}
+-
+-.gv-friend-avatar {
+-  width: 36px;
+-  height: 36px;
+-  border-radius: 50%;
+-  object-fit: cover;
+-}
+-
+-.gv-status-dot {
+-  position: absolute;
+-  bottom: 0;
+-  right: 0;
+-  width: 10px;
+-  height: 10px;
+-  border-radius: 50%;
+-  border: 2px solid var(--gv-sidebar-bg);
+-}
+-
+-.gv-status-dot.online { background: #4CAF50; }
+-
+-.gv-friend-info {
+-  display: flex;
+-  flex-direction: column;
+-  min-width: 0;
+-}
+-
+-.gv-friend-name {
+-  font-size: 13px;
+-  font-weight: 600;
+-  color: white;
+-  white-space: nowrap;
+-  overflow: hidden;
+-  text-overflow: ellipsis;
+-}
+-
+-.gv-friend-status {
+-  font-size: 11px;
+-  color: var(--gv-text-muted);
+-  white-space: nowrap;
+-  overflow: hidden;
+-  text-overflow: ellipsis;
+-}
+-
+-.gv-recent-list {
+-  display: flex;
+-  flex-direction: column;
+-  gap: 14px;
+-}
+-
+-.gv-recent-item {
+-  display: flex;
+-  align-items: center;
+-  gap: 12px;
+-}
+-
+-.gv-recent-thumb {
+-  width: 44px;
+-  height: 44px;
+-  border-radius: 10px;
+-  object-fit: cover;
+-}
+-
+-.gv-recent-info {
+-  flex: 1;
+-  display: flex;
+-  flex-direction: column;
+-  gap: 4px;
+-}
+-
+-.gv-recent-header {
+-  display: flex;
+-  align-items: center;
+-  justify-content: space-between;
+-}
+-
+-.gv-recent-title {
+-  font-size: 12px;
+-  font-weight: 600;
+-  color: white;
+-  white-space: nowrap;
+-  overflow: hidden;
+-  text-overflow: ellipsis;
+-  max-width: 130px;
+-}
+-
+-.gv-recent-pct {
+-  font-size: 11px;
+-  color: var(--gv-text-muted);
+-}
+-
+-.gv-progress-bar-bg {
+-  width: 100%;
+-  height: 4px;
+-  background: rgba(255, 255, 255, 0.08);
+-  border-radius: 4px;
+-  overflow: hidden;
+-}
+-
+-.gv-progress-bar-fill {
+-  height: 100%;
+-  background: var(--gv-pink-gradient);
+-  border-radius: 4px;
+-}
+-
+ /* Category Filter Tags Pills */
+ .gv-category-pills {
+   display: flex;

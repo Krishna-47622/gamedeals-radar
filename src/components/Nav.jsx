@@ -119,7 +119,7 @@ export default function Nav() {
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z" />
           </svg>
         </div>
-        <span className="gv-brand-name">GAMEVERSE</span>
+        <span className="gv-brand-name">GAMESRADAR</span>
       </div>
 
       {/* Main Nav Items */}

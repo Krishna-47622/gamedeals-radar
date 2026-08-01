@@ -3,7 +3,6 @@ import { AnimatePresence } from 'framer-motion'
 import { useAuth } from './lib/AuthContext.jsx'
 import Nav from './components/Nav.jsx'
 import Header from './components/Header.jsx'
-import FriendsSidebar from './components/FriendsSidebar.jsx'
 import { PageTransition } from './components/motion.jsx'
 import Login from './pages/Login.jsx'
 import Trending from './pages/Trending.jsx'
@@ -74,8 +73,6 @@ export default function App() {
           </AnimatePresence>
         </div>
       </div>
-
-      {user && <FriendsSidebar />}
     </div>
   )
 }
