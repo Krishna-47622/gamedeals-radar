@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from 'react'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { useAuth } from './lib/AuthContext.jsx'
 import Nav from './components/Nav.jsx'
@@ -52,10 +52,10 @@ export default function App() {
   return (
     <div className="gv-app-shell">
       {user && <Nav />}
-      
+
       <div className="gv-main-area">
         {user && <Header />}
-        
+
         <div className="gv-page-body">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
